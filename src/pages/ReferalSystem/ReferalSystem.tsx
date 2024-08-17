@@ -12,8 +12,6 @@ interface Referral {
   points: number;
 }
 
-const API_BASE_URL = 'https://b787-38-180-23-221.ngrok-free.app'; // Replace with your actual backend URL
-
 const ReferralSystem: React.FC = () => {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
@@ -22,72 +20,24 @@ const ReferralSystem: React.FC = () => {
   const initData = useInitData();
   const { startParam } = useLaunchParams();
 
-  // Helper function to make fetch requests with ngrok bypass header and CORS handling
-  const fetchWithNgrokBypass = async (url: string, options: RequestInit = {}) => {
-    const defaultHeaders = {
-      'ngrok-skip-browser-warning': '69420',
-      'Content-Type': 'application/json',
-    };
-  
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...defaultHeaders,
-          ...options.headers,
-        },
-        mode: 'cors',
-        credentials: 'include',
-      });
-  
-      console.log('Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      return response;
-    } catch (error) {
-      console.error('Fetch error:', error);
-      console.error('Request details:', {
-        url,
-        options: {
-          ...options,
-          headers: {
-            ...defaultHeaders,
-            ...options.headers,
-          },
-        },
-      });
-      throw error;
-    }
-  };
-
   useEffect(() => {
     const initApp = async () => {
       if (initData?.user) {
         const userId = initData.user.id;
 
         if (userId) {
-          // Создание реферальной ссылки
           const botUsername = "@tesase_bot";
           const newReferralLink = `https://t.me/${botUsername}?startapp=${userId}`;
           setReferralLink(newReferralLink);
 
-          // Проверка наличия стартового параметра (реферальной ссылки)
           console.log('Start Parameter:', startParam);
           if (startParam) {
             const referrerId = parseInt(startParam, 10);
-            if (!isNaN(referrerId)) {
+            if (!isNaN(referrerId) && referrerId !== userId) {
               await createReferral(referrerId, userId);
             }
           }
 
-          // Получение информации о рефералах пользователя
           fetchUserReferrals(userId);
         }
       }
@@ -98,16 +48,39 @@ const ReferralSystem: React.FC = () => {
 
   const createReferral = async (referrerId: number, userId: number) => {
     try {
-      await fetchWithNgrokBypass(`${API_BASE_URL}/referrals/`, {
+      console.log(`Attempting to create referral: referrerId=${referrerId}, userId=${userId}`);
+      
+      // Проверка существования реферала
+      const existingReferrals = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/${referrerId}`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420'
+        }
+      });
+      const existingReferralsData = await existingReferrals.json();
+      
+      if (existingReferralsData.some((ref: Referral) => ref.friend_tg_id === userId)) {
+        console.log('Referral already exists');
+        return;
+      }
+
+      const response = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': '69420'
+        },
         body: JSON.stringify({
           user_tg_id: referrerId,
           friend_tg_id: userId,
         }),
       });
 
-      // Обновление данных о рефералах после создания реферала
-      fetchUserReferrals(userId);
+      if (response.ok) {
+        console.log('Referral created successfully');
+        fetchUserReferrals(userId);
+      } else {
+        console.error('Failed to create referral:', await response.text());
+      }
     } catch (error) {
       console.error('Error creating referral:', error);
     }
@@ -115,19 +88,22 @@ const ReferralSystem: React.FC = () => {
 
   const fetchUserReferrals = async (userId: number) => {
     try {
-      console.log('Fetching referrals for user ID:', userId);
-      const referralsResponse = await fetchWithNgrokBypass(`${API_BASE_URL}/referrals/${userId}`);
-      const pointsResponse = await fetchWithNgrokBypass(`${API_BASE_URL}/referrals/${userId}/points`);
-
-      console.log('Referrals response:', referralsResponse);
-      console.log('Points response:', pointsResponse);
+      console.log(`Fetching referrals for user ${userId}`);
+      const referralsResponse = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/${userId}`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420'
+        }
+      });
+      const pointsResponse = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/${userId}/points`, {
+        headers: {
+          'ngrok-skip-browser-warning': '69420'
+        }
+      });
 
       const referralsData: Referral[] = await referralsResponse.json();
       const { total_points } = await pointsResponse.json();
 
-      console.log('Referrals Data:', referralsData);
-      console.log('Total Points:', total_points);
-
+      console.log('Fetched referrals:', referralsData);
       setReferrals(referralsData);
       setTotalPoints(total_points);
     } catch (error) {
@@ -136,11 +112,25 @@ const ReferralSystem: React.FC = () => {
   };
 
   const handleInviteFriend = () => {
-    const utils = initUtils(); // Использование Telegram utils для шеринга реферальной ссылки
+    const utils = initUtils();
     utils.shareURL(
       referralLink,
       'Join me on this awesome app!'
     );
+  };
+
+  const getDisplayName = (friendTgId: number): string => {
+    // Используем InitData для получения username
+    if (initData?.user && initData.user.id === friendTgId) {
+      return initData.user.username || initData.user.firstName || `User ${friendTgId}`;
+    }
+    // Если пользователь не найден в InitData, возвращаем ID
+    return `User ${friendTgId}`;
+  };
+
+  const getInitial = (friendTgId: number): string => {
+    const displayName = getDisplayName(friendTgId);
+    return displayName[0].toUpperCase();
   };
 
   return (
@@ -159,9 +149,9 @@ const ReferralSystem: React.FC = () => {
             <li key={referral.id} className="friend-item">
               <div className="friend-info">
                 <div className="friend-avatar">
-                  {referral.friend_tg_id.toString()[0].toUpperCase()}
+                  {getInitial(referral.friend_tg_id)}
                 </div>
-                <span>Friend ID: {referral.friend_tg_id}</span>
+                <span>{getDisplayName(referral.friend_tg_id)}</span>
               </div>
               <span className="friend-points">{referral.points} BP</span>
             </li>

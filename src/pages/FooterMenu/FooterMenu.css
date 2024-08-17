@@ -24,10 +24,20 @@ body {
   background-color: #1e2c3d;
   padding: 12px 0;
   position: fixed;
-  bottom: 0;
+  bottom: 8px;
   left: 0;
   right: 0;
   z-index: 1000;
+}
+
+.footer-menu::after {
+  content: '';
+  position: absolute;
+  bottom: -8px; 
+  left: 0;
+  right: 0;
+  height: 8px; 
+  background-color: #1e2c3d; 
 }
 
 .footer-icon {
@@ -55,7 +65,7 @@ body {
 /* Ensure content doesn't go under the footer */
 main {
   flex: 1;
-  padding-bottom: 54px; /* Adjust this value based on your footer height */
+  padding-bottom: 62px; /* 54px (исходная высота футера) + 8px (на сколько подняли меню) */
 }
 
 /* Add this to ensure the app takes up the full height of the screen */

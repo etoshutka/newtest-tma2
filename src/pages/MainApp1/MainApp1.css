@@ -274,12 +274,12 @@ header::before {
 }
 
 .product-item img, .brand-logo, .best-seller-item img {
-    width: 100%; /* Изображение занимает всю ширину контейнера */
+    width: 80%; /* Изображение занимает всю ширину контейнера */
     height: auto; /* Изображение занимает всю высоту контейнера */
     object-fit: cover; /* Изображение масштабируется, сохраняя пропорции */
     object-position: center; /* Центрируем изображение */
     border-radius: 0px; /* Сохраняем скругленные углы, если нужно */
-}
+} 
 
 /* Responsive adjustments */
 @media (max-width: 481px) {
@@ -288,6 +288,6 @@ header::before {
     }
     
     .product-item img, .brand-logo, .best-seller-item img {
-        height: 200px;
+        height: 150px;
     }
 }
