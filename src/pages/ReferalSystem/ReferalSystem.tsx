@@ -136,7 +136,6 @@ const ReferralSystem: React.FC = () => {
   return (
     <div className="referral-container">
       <div className="info-section">
-        <p>Score 10% from buddies + 2.5% from their referrals.</p>
         <p>
           Get a <img className="ticket-discount" src={ticketDiscount} alt="Ticket discount" /> play pass for each fren.
         </p>

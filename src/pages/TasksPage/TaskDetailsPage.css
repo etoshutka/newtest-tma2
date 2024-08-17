@@ -46,6 +46,7 @@
   }
   
   .task-description {
+    font-family: "Urban Starblues", sans-serif;
     text-align: center;
     margin-bottom: 20px;
     color: rgba(91, 84, 117, 0.8);
@@ -53,6 +54,7 @@
   }
   
   .task-info {
+    font-family: "Urban Starblues", sans-serif;
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;

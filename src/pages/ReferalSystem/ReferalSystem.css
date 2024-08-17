@@ -1,3 +1,5 @@
+
+
 .referral-container {
   padding: 1rem;
   background-color: white;
@@ -22,6 +24,7 @@
 }
 
 .info-section {
+  font-family: "Urban Starblues", sans-serif;
   margin-bottom: 1.5rem;
   font-weight: 500;
   font-size: 18px;
@@ -33,6 +36,7 @@
 }
 
 .friends-section {
+  font-family: "Urban Starblues", sans-serif;
   margin-bottom: 1.5rem;
   color: #333;
   position: relative;
@@ -40,6 +44,7 @@
 }
 
 .friends-section h3 {
+  font-family: "Urban Starblues", sans-serif;
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
@@ -136,6 +141,7 @@
 }
 
 .total-points {
+  font-family: "Urban Starblues", sans-serif;
   padding-bottom: 10px;
   margin-bottom: 1.5rem;
   position: relative;

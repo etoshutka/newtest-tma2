@@ -1,5 +1,6 @@
 * {
   box-sizing: border-box;
+  font-family: "Urban Starblues", sans-serif;
 }
 
 body {
@@ -49,7 +50,6 @@ body {
 }
 
 .tasks-title {
-  font-family: "Urban Starblues";
   font-size: 25px;
   font-weight: bold;
   font-weight: 400px;
@@ -132,7 +132,7 @@ body {
 
 .task-name {
   font-weight: 900;
-  font-family: "Urbanist";
+  /* font-family: "Urbanist"; */
   color: rgba(52, 46, 77, 1);
   margin: 0;
   font-size: 20px; /* Slightly reduced font size */
@@ -141,7 +141,7 @@ body {
 }
 
 .task-value {
-  font-family: "Urbanist";
+ /* font-family: "Urbanist"; */
   font-weight: 400;
   font-size: 25px; /* Slightly reduced font size */
   color: rgba(91, 84, 117, 1);

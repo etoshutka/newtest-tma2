@@ -1,3 +1,7 @@
+body,html {
+  font-family: Arial, sans-serif;
+}
+
 .main-app-container {
   display: flex;
   flex-direction: column;
