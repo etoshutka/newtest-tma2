@@ -10,6 +10,7 @@ interface Referral {
   user_tg_id: number;
   friend_tg_id: number;
   points: number;
+  username: string | null;
 }
 
 const ReferralSystem: React.FC = () => {
@@ -18,23 +19,28 @@ const ReferralSystem: React.FC = () => {
   const [referralLink, setReferralLink] = useState('');
 
   const initData = useInitData();
-  const { startParam } = useLaunchParams();
+  const lp = useLaunchParams();
 
   useEffect(() => {
     const initApp = async () => {
       if (initData?.user) {
         const userId = initData.user.id;
+        const username = initData.user.username || null;
 
         if (userId) {
-          const botUsername = "@tesase_bot";
+          const botUsername = "tesase_bot";
+          // Используем startapp для Mini App
           const newReferralLink = `https://t.me/${botUsername}?startapp=${userId}`;
           setReferralLink(newReferralLink);
 
-          console.log('Start Parameter:', startParam);
-          if (startParam) {
-            const referrerId = parseInt(startParam, 10);
+          console.log('Launch Params:', lp);
+          console.log('Start Param:', lp.startParam);
+          
+          // Проверка и обработка startParam
+          if (lp.startParam) {
+            const referrerId = parseInt(lp.startParam, 10);
             if (!isNaN(referrerId) && referrerId !== userId) {
-              await createReferral(referrerId, userId);
+              await createReferral(referrerId, userId, username);
             }
           }
 
@@ -44,14 +50,14 @@ const ReferralSystem: React.FC = () => {
     };
 
     initApp();
-  }, [initData, startParam]);
+  }, [initData, lp]);
 
-  const createReferral = async (referrerId: number, userId: number) => {
+  const createReferral = async (referrerId: number, userId: number, username: string | null) => {
     try {
-      console.log(`Attempting to create referral: referrerId=${referrerId}, userId=${userId}`);
+      console.log(`Attempting to create referral: referrerId=${referrerId}, userId=${userId}, username=${username}`);
       
-      // Проверка существования реферала
-      const existingReferrals = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/${referrerId}`, {
+      // Проверка существующего реферала
+      const existingReferrals = await fetch(`https://d84c-38-180-23-221.ngrok-free.app/referrals/${referrerId}`, {
         headers: {
           'ngrok-skip-browser-warning': '69420'
         }
@@ -63,7 +69,7 @@ const ReferralSystem: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/`, {
+      const response = await fetch(`https://d84c-38-180-23-221.ngrok-free.app/referrals/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,6 +78,7 @@ const ReferralSystem: React.FC = () => {
         body: JSON.stringify({
           user_tg_id: referrerId,
           friend_tg_id: userId,
+          username: username
         }),
       });
 
@@ -89,12 +96,12 @@ const ReferralSystem: React.FC = () => {
   const fetchUserReferrals = async (userId: number) => {
     try {
       console.log(`Fetching referrals for user ${userId}`);
-      const referralsResponse = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/${userId}`, {
+      const referralsResponse = await fetch(`https://d84c-38-180-23-221.ngrok-free.app/referrals/${userId}`, {
         headers: {
           'ngrok-skip-browser-warning': '69420'
         }
       });
-      const pointsResponse = await fetch(`https://f999-38-180-23-221.ngrok-free.app/referrals/${userId}/points`, {
+      const pointsResponse = await fetch(`https://d84c-38-180-23-221.ngrok-free.app/referrals/${userId}/points`, {
         headers: {
           'ngrok-skip-browser-warning': '69420'
         }
@@ -119,17 +126,20 @@ const ReferralSystem: React.FC = () => {
     );
   };
 
-  const getDisplayName = (friendTgId: number): string => {
-    // Используем InitData для получения username
-    if (initData?.user && initData.user.id === friendTgId) {
-      return initData.user.username || initData.user.firstName || `User ${friendTgId}`;
+  const getDisplayName = (referral: Referral): string => {
+    if (referral.username) {
+      return referral.username;
     }
-    // Если пользователь не найден в InitData, возвращаем ID
-    return `User ${friendTgId}`;
+    // If the referral is for the current user and we have their InitData
+    if (initData?.user && initData.user.id === referral.friend_tg_id) {
+      return initData.user.username || initData.user.firstName || `User ${referral.friend_tg_id}`;
+    }
+    // If no username is available, return the ID
+    return `User ${referral.friend_tg_id}`;
   };
 
-  const getInitial = (friendTgId: number): string => {
-    const displayName = getDisplayName(friendTgId);
+  const getInitial = (referral: Referral): string => {
+    const displayName = getDisplayName(referral);
     return displayName[0].toUpperCase();
   };
 
@@ -148,9 +158,9 @@ const ReferralSystem: React.FC = () => {
             <li key={referral.id} className="friend-item">
               <div className="friend-info">
                 <div className="friend-avatar">
-                  {getInitial(referral.friend_tg_id)}
+                  {getInitial(referral)}
                 </div>
-                <span>{getDisplayName(referral.friend_tg_id)}</span>
+                <span>{getDisplayName(referral)}</span>
               </div>
               <span className="friend-points">{referral.points} BP</span>
             </li>

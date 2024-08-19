@@ -6,7 +6,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/newtest-tma2/',
+  base: '/weedton_tma/',
   plugins: [
     react(),
     tsconfigPaths(),
